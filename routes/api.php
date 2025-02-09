@@ -34,6 +34,6 @@ Route::post('login', [AuthController::class, 'AuthUser']);
 Route::post('logout', [AuthController::class, 'logout']);
 Route::post('refresh', [AuthController::class, 'refershToken']);
 Route::post('/regist' , [AuthController::class, 'RegistUser']);
-Route::get('/main', [MainController::class, 'ShowMainPage']);
-Route::match(['get', 'post'], 'dishes', [MainController::class, 'ShowDishesPage']);
+Route::post('/addThread' ,[MainController::class , 'AddThread']);
+Route::get('/showThread' ,[MainController::class , 'showThread']);
 

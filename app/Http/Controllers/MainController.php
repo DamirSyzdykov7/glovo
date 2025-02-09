@@ -10,57 +10,58 @@ use App\Models\dishes;
 use App\Models\Restoraunts;
 use Psy\Command\WhereamiCommand;
 use Illuminate\Support\Facades\URL;
+use App\Models\Thread;
 
 class MainController extends Controller
 {
-    public function ShowMainPage() {
-        $isRestoraunts = Restoraunts::all();
+
+    protected $user;
+
+    public function infoUSer($user) { 
+        $this->$user = $user;
+    }
+
+    public function AddThread(Request $request) {
+        $user =  session('username'); 
+
+        $getInfo = $request->input('title');
+
+        if (session()->has('username')) {
+            echo "Пользователь: " . session('username');
+        } else {
+            echo "Нет данных в сессии.";
+        }
+        
+        if(isset($getInfo) && !empty($getInfo)) {
+
+            Thread::create([
+                'user' => isset($user) ? $user : 'гость' ,
+                'name_Thread' => $request->input('title'),
+                'Info' => $request->input('content'),
+                
+            ]);
+        } else {
+            echo 'данные не пришли';
+        }
 
         return response()->json([
-           'isRestoraunts' => $isRestoraunts,
+            'info' => $getInfo
         ]);
     }
 
-
-    public function ShowDishesPage(Request $request) {
-        $hadDishes = dishes::where('restoraunt_name' , $request->input("restorauntName"))->get();
-        
-
-        //return view('dishes', ['hadDishes' => $hadDishes, 'isUser' => $isUser, 'isCartDishes' => $isCartDishes]);
-        return response()->json([
-            'hadDishes' => $hadDishes,
-         ]);
-    }
-
-    public function ActionDishesPage(Request $request) {
-        $isUser = Auth::user()->id;
-
-        $cart = new cart();
-        $cart->name_of_dish = $request->input('dishName');
-        $cart->price = $request->input('dishPrice');
-        $cart->user()->associate($isUser);
-        $cart->save();
-
-        return back();
-    }
-
-    public function CartShow() {
-            $isUser = Auth::user();
-        $cartDishes = cart::where('user_id', $isUser->id)->get();
-        return view('cart',  ['cartDishes' => $cartDishes, 'isUser' => $isUser]);
-    }
-
-    public function ProfileShow() {
-        if(auth()->check()) {
-            $authUserId = Auth::user()->id; 
+    public function showThread() {
+        if(isset($_SESSION['username'])) {
+            $userName = session('username');
         } else {
-            $authUserId = null;
+            $userName = null;
         }
-            $validatedUser = User::where('id' , $authUserId)->first();
-            return response()->json([
-                'authUserId' => $authUserId,
-                'validatedUser' => $validatedUser,
-            ]);
+        $data = Thread::all();
+
+        return response()->json([
+            'user' => $userName,
+            'thread' => $data
+        ]);
     }
+
 }
 

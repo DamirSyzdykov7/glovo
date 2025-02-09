@@ -12,7 +12,7 @@ use App\Models\Restoraunts;
 use Illuminate\Support\Str;
 
 
-class AuthController extends Controller
+class AuthController extends MainController
 {
 
     public function AuthUser(Request $request) {
@@ -23,17 +23,32 @@ class AuthController extends Controller
 
         $isInputInfo = $request->only('name','password');
 
+
         $token = JWTAuth::attempt($isInputInfo);
         if(!$token) {
             return response()->json(['ошибка авторизации',404]);
         }
-        
+
+        session(['username' => $isInputInfo['name']]);
+
+
+        $user = session('username');
+
+        if (session()->has('username')) {
+            echo "Пользователь: " . session('username');
+        } else {
+            echo "Нет данных в сессии.";
+        }
+
+        $get = new MainController(session('username')) ;
+
         return $this->respondWithToken($token);
 
     }
 
     protected function respondWithToken($token) {
         return response()->json([
+            'userName' => session('username'),
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60
